@@ -9,7 +9,7 @@ import{
 @Injectable ({ providedIn: 'root'})
 
 export class PedidosService{
-    private apiUrl = "https://l6ugs35qc8.execute-api.us-east-1.amazonaws.com/test/api/pedidos";
+    private apiUrl = "https://owpdy1tbaj.execute-api.us-east-1.amazonaws.com/Deploy1_Ev/api/pedidos";
     constructor(
         private http: HttpClient
     ){}
