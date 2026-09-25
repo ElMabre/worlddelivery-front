@@ -4,26 +4,22 @@ import { App } from './app/app';
 import { Amplify } from 'aws-amplify';
 
 Amplify.configure({
-  Auth:{
-    Cognito:{
-      userPoolId: 'us-east-1_opOG7hsM7',
-      userPoolClientId : '2sih6u5tqlerpggsiorlpnf8i4',
-      loginWith:{
-        oauth:{
-          domain: 'us-east-1opog7hsm7.auth.us-east-1.amazoncognito.com',
-          scopes:[
+  Auth: {
+    Cognito: {
+      userPoolId: 'us-east-1_oTG1RQi5f',
+      userPoolClientId: 'sdeamtb3pnutncs1kql17mtq',
+      loginWith: {
+        oauth: {
+          domain: 'us-east-1otg1rqi5f.auth.us-east-1.amazoncognito.com', 
+          scopes: [
             'email',
             'openid',
             'profile',
-            'rs-api-pedidos/pedidos-read'
+            'resource-server-worlddelivery/api-access'
           ],
-          redirectSignIn:[
-            'http://localhost:4200'
-          ],
-          redirectSignOut:[
-            'http://localhost:4200'
-          ],
-          responseType:'code'
+          redirectSignIn: ['http://localhost:4200'],
+          redirectSignOut: ['http://localhost:4200'],
+          responseType: 'code'
         }
       }
     }

@@ -1,13 +1,213 @@
-.container{
-    max-width: 900px;
-    margin: 40px auto;
-    font-family: Arial, sans-serif;
+:host {
+  --brand-orange: #ea580c;
+  --brand-orange-hover: #c2410c;
+  --bg-app: #f8fafc;
+  --surface: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-main);
 }
-button {
-    margin-right: 10px;
-    padding: 10px 16px;
+
+.container {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
 }
-textarea{
-    width: 100%;
-    margin-top: 10px;
+
+.header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  margin: 0 0 0.25rem 0;
+  color: var(--text-main);
+  font-size: 1.75rem;
+  letter-spacing: -0.025em;
+}
+
+.header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-primary { 
+  background-color: var(--brand-orange); 
+  color: white; 
+}
+.btn-primary:hover { 
+  background-color: var(--brand-orange-hover); 
+}
+
+.btn-secondary { 
+  background-color: var(--surface); 
+  border-color: var(--border-color); 
+  color: var(--text-main); 
+}
+.btn-secondary:hover { 
+  background-color: var(--bg-app); 
+}
+
+.btn-danger { 
+  background-color: transparent; 
+  color: #ef4444; 
+}
+.btn-danger:hover { 
+  background-color: #fef2f2; 
+}
+
+.btn-success { 
+  background-color: var(--text-main); 
+  color: white; 
+}
+.btn-success:hover { 
+  background-color: #334155; 
+}
+
+.w-100 { width: 100%; margin-top: 1.5rem; padding: 0.75rem; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 2rem;
+}
+
+.user-name {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--brand-orange);
+  margin-bottom: 1.5rem;
+}
+
+.token-box {
+  width: 100%;
+  height: 60px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-app);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  resize: none;
+  box-sizing: border-box;
+}
+
+.divider {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px dashed var(--border-color);
+}
+
+.status-msg {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+.loading { color: var(--text-muted); }
+.error { color: #ef4444; background: #fef2f2; padding: 0.5rem; border-radius: 4px; }
+
+.pedidos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pedido-card {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1.25rem;
+  background: var(--surface);
+  transition: border-color 0.2s ease;
+}
+
+.pedido-card:hover {
+  border-color: var(--brand-orange);
+}
+
+.pedido-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.pedido-header h3 { 
+  margin: 0; 
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.badge {
+  background: var(--bg-app);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.pedido-body {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.pedido-body strong {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.badge-preparacion {
+  background-color: #d97706; 
+  color: #ffffff;
+  border-color: #f59e0b;
+}
+
+.badge-transito {
+  background-color: #2563eb; 
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.badge-entregado {
+  background-color: #16a34a; 
+  color: #ffffff;
+  border-color: #22c55e;
+}
+
+.badge-pendiente {
+  background-color: #475569; 
+  color: #ffffff;
+  border-color: #64748b;
+}
+
+.badge-reparto {
+  background-color: #7c3aed; 
+  color: #ffffff;
+  border-color: #8b5cf6;
 }

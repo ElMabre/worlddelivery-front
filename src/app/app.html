@@ -1,54 +1,57 @@
 <main class="container">
-  <h1>Pedidos 360</h1>
-  <p>
-    Frontend Cloud Native
-  </p>
-  <hr>
-  <button (click) ="login()">
-    Iniciar Sesion
-  </button>
-  <button (click) ="verSesion()">
-    Ver Sesion
-  </button>
-  <button (click) ="logout()">
-    Cerrar Sesion
-  </button>
+  <header class="header">
+    <h1>World Delivery</h1>
+    <p>Plataforma de Logística</p>
+  </header>
 
-  @if (autenticado){
-    <section>
-      <h2>Usuario Autenticado</h2>
-      <p>{{usuario}}</p>
+  <section class="action-buttons">
+    <button class="btn btn-primary" (click)="login()">Iniciar Sesión</button>
+    <button class="btn btn-secondary" (click)="verSesion()">Ver Sesión</button>
+    <button class="btn btn-danger" (click)="logout()">Cerrar Sesión</button>
+  </section>
 
-      <h3>Access Token</h3>
-      <textarea rows="10" cols="80" readonly>{{token}}</textarea>
+  @if (autenticado) {
+  <section class="card auth-section">
+    <h2>Usuario Autenticado</h2>
+    <p class="user-name">👤 {{usuario}}</p>
 
-      <hr>
-      <button (click)="consultarPedidos()">
-        Consultar Pedidos
-      </button>
-      @if (cargandoPedidos) {
-        <p>Cargando Pedidos.......</p>
+    <h3>Access Token</h3>
+    <textarea class="token-box" readonly>{{token}}</textarea>
+
+    <hr class="divider" />
+
+    <button class="btn btn-success w-100" (click)="consultarPedidos()">
+      Consultar Pedidos
+    </button>
+
+    @if (cargandoPedidos) {
+    <p class="status-msg loading">⏳ Cargando Pedidos.......</p>
+    } @if (errorPedidos) {
+    <p class="status-msg error">❌ {{errorPedidos}}</p>
+    } @if (pedidos.length > 0) {
+    <div class="pedidos-grid">
+      @for(pedido of pedidos; track pedido.id) {
+      <article class="pedido-card">
+        <header class="pedido-header">
+          <h3>Pedido #{{pedido.id}}</h3>
+          <span
+            class="badge"
+            [class.badge-preparacion]="pedido.estado === 'EN PREPARACION'"
+            [class.badge-transito]="pedido.estado === 'EN TRANSITO'"
+            [class.badge-entregado]="pedido.estado === 'ENTREGADO'"
+            [class.badge-pendiente]="pedido.estado === 'PENDIENTE'"
+            [class.badge-reparto]="pedido.estado === 'EN REPARTO'"
+          >
+            {{pedido.estado}}
+          </span>
+        </header>
+        <p class="pedido-body">
+          <strong>Producto:</strong> {{pedido.producto}}
+        </p>
+      </article>
       }
-      @if(errorPedidos){
-        <p>{{errorPedidos}}</p>
-      }
-      @if (pedidos.length > 0) {
-        @for(pedido of pedidos; track pedido.id){
-          <article>
-            <h3>
-              Pedido #{{pedido.id}}
-            </h3>
-            <p><strong>Estado:</strong> {{pedido.estado}}</p>
-            <p><strong>Producto:</strong> {{pedido.producto}}</p>
-            <hr>
-          </article>
-        }
-
-      }
-
-    </section>
-
-
+    </div>
+    }
+  </section>
   }
-
 </main>

@@ -1,59 +1,68 @@
-# Pedidos360Front
+# World Delivery - Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
+Aplicación Single Page Application (SPA) construida en Angular, correspondiente a la capa frontend de la plataforma de logística World Delivery. Este proyecto se integra con Amazon Cognito para la gestión de identidad y consume un backend protegido en Spring Boot a través de Amazon API Gateway.
 
-## Development server
+## Arquitectura y Tecnologías
 
-To start a local development server, run:
+- **Framework:** Angular
+- **Autenticación:** AWS Amplify + Amazon Cognito
+- **Flujo de Seguridad:** OAuth 2.0 / OIDC (Authorization Code Grant con PKCE)
+- **Integración Backend:** Amazon API Gateway + Interceptor HTTP para inyección automática de Bearer Token (JWT)
 
-```bash
-ng serve
+## Prerrequisitos
+
+- Node.js y npm instalados.
+- Angular CLI instalado globalmente (`npm install -g @angular/cli`).
+- Entorno backend operativo (instancia EC2 con Spring Boot y API Gateway configurado).
+
+## Configuración de AWS Cognito
+
+Antes de ejecutar el proyecto, asegúrate de que las credenciales de tu User Pool y App Client público estén correctamente configuradas en el archivo `src/main.ts`:
+
+```typescript
+Amplify.configure({
+  Auth: {
+    Cognito: {
+      userPoolId: '<USER_POOL_ID>',
+      userPoolClientId: '<APP_CLIENT_ID>',
+      loginWith: {
+        oauth: {
+          domain: '<COGNITO_DOMAIN>',
+          scopes: ['email', 'openid', 'profile', 'resource-server-worlddelivery/api-access'],
+          redirectSignIn: ['http://localhost:4200'],
+          redirectSignOut: ['http://localhost:4200'],
+          responseType: 'code'
+        }
+      }
+    }
+  }
+});
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+> **Nota:** Las URLs de redirección (`localhost:4200`) deben estar explícitamente autorizadas en la consola de AWS Cognito (*Allowed callback URLs* / *Allowed sign-out URLs*).
 
-## Code scaffolding
+## Ejecución Local (Desarrollo)
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+1. Instala las dependencias del proyecto:
 
-```bash
-ng generate component component-name
-```
+   ```bash
+   npm install
+   ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+2. Levanta el servidor de desarrollo:
 
-```bash
-ng generate --help
-```
+   ```bash
+   ng serve
+   ```
 
-## Building
+   La aplicación estará disponible en `http://localhost:4200/`. El servidor recargará la vista automáticamente al detectar cambios en el código.
 
-To build the project run:
+## Construcción para Producción
+
+Para compilar los artefactos estáticos optimizados y subirlos a una instancia EC2 (Nginx) o un bucket S3:
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Los archivos minificados listos para despliegue se generarán en el directorio `dist/`.
