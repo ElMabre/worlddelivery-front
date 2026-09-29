@@ -1,27 +1,50 @@
 <main class="container">
   <header class="header">
-    <h1>World Delivery</h1>
-    <p>Plataforma de Logística</p>
+    <div class="header-titles">
+      <h1>World Delivery</h1>
+      <p>Plataforma de Logística</p>
+    </div>
+    
+    <div class="auth-controls">
+      @if (verificandoSesion) {
+        <span class="loading-text">⏳ Verificando...</span>
+      } @else {
+        @if (!autenticado) {
+          <button class="btn btn-primary" (click)="login()">Iniciar Sesión</button>
+        }
+        @if (autenticado) {
+          <button class="btn btn-danger-outline" (click)="logout()">Cerrar Sesión</button>
+        }
+      }
+    </div>
   </header>
 
-  <section class="action-buttons">
-    <button class="btn btn-primary" (click)="login()">Iniciar Sesión</button>
-    <button class="btn btn-secondary" (click)="verSesion()">Ver Sesión</button>
-    <button class="btn btn-danger" (click)="logout()">Cerrar Sesión</button>
-  </section>
-
   @if (autenticado) {
-  <section class="card auth-section">
-    <h2>Usuario Autenticado</h2>
-    <p class="user-name">👤 {{usuario}}</p>
-
-    <h3>Access Token</h3>
-    <textarea class="token-box" readonly>{{token}}</textarea>
+  <section class="card">
+    <h2 class="section-title">Usuario Autenticado</h2>
+    <p class="user-name">✉️ {{usuario}}</p>
 
     <hr class="divider" />
 
+    <div class="create-order-form">
+      <input type="text" #nuevoProducto placeholder="Nombre del nuevo producto..." class="form-control flex-grow">
+      <input type="text" #nuevoCliente placeholder="Nombre del cliente..." class="form-control flex-grow">
+      <input type="text" #nuevaDireccion placeholder="Dirección de entrega..." class="form-control flex-grow">
+      <input type="date" #nuevaFecha class="form-control flex-grow">
+      
+      <select #estadoInicial class="form-control select-auto">
+        <option value="PENDIENTE">PENDIENTE</option>
+        <option value="EN PREPARACION" selected>EN PREPARACION</option>
+        <option value="EN TRANSITO">EN TRANSITO</option>
+        <option value="EN REPARTO">EN REPARTO</option>
+        <option value="ENTREGADO">ENTREGADO</option>
+      </select>
+
+      <button class="btn btn-primary" (click)="crearPedido(nuevoProducto, nuevoCliente, nuevaDireccion, nuevaFecha, estadoInicial)">Crear Pedido</button>
+    </div>
+
     <button class="btn btn-success w-100" (click)="consultarPedidos()">
-      Consultar Pedidos
+      Revisar Pedidos
     </button>
 
     @if (cargandoPedidos) {
@@ -45,9 +68,28 @@
             {{pedido.estado}}
           </span>
         </header>
+        
         <p class="pedido-body">
-          <strong>Producto:</strong> {{pedido.producto}}
+          <strong>Producto:</strong> {{pedido.producto}} <br>
+          <strong>Cliente:</strong> {{pedido.cliente}} <br>
+          <strong>Dirección:</strong> {{pedido.direccion}} <br>
+          <strong>Fecha Entrega:</strong> {{pedido.fechaEntrega}}
         </p>
+        
+        <footer class="pedido-footer">
+          <select class="form-control flex-grow" [value]="pedido.estado" (change)="pedido.estadoSeleccionado = $any($event.target).value">
+            <option value="PENDIENTE">PENDIENTE</option>
+            <option value="EN PREPARACION">EN PREPARACION</option>
+            <option value="EN TRANSITO">EN TRANSITO</option>
+            <option value="EN REPARTO">EN REPARTO</option>
+            <option value="ENTREGADO">ENTREGADO</option>
+          </select>
+          
+          <div class="footer-actions">
+            <button class="btn btn-secondary flex-grow" (click)="actualizarEstado(pedido.id, pedido.estadoSeleccionado || pedido.estado)">Modificar</button>
+            <button class="btn btn-danger-outline" (click)="eliminarPedido(pedido.id)">Eliminar</button>
+          </div>
+        </footer>
       </article>
       }
     </div>

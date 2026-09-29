@@ -15,7 +15,10 @@ Amplify.configure({
             'email',
             'openid',
             'profile',
-            'resource-server-worlddelivery/api-access'
+            'resource-server-worlddelivery/api-access',
+            'resource-server-worlddelivery/write',
+            'resource-server-worlddelivery/update',
+            'resource-server-worlddelivery/delete'
           ],
           redirectSignIn: ['http://localhost:4200'],
           redirectSignOut: ['http://localhost:4200'],
