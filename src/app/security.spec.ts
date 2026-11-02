@@ -1,0 +1,21 @@
+import { TestBed } from '@angular/core/testing';
+import { provideRouter,Router,ActivatedRouteSnapshot,RouterStateSnapshot } from '@angular/router';
+import { provideHttpClient,withInterceptors,HttpClient } from '@angular/common/http';
+import { provideHttpClientTesting,HttpTestingController } from '@angular/common/http/testing';
+import { describe,it,expect,vi,beforeEach,afterEach } from 'vitest';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from './auth.service';
+import { authGuard,adminGuard } from './auth.guard';
+import { authInterceptor,isApiUrl } from './auth.interceptor';
+import { environment } from '../environments/environment';
+describe('Límites de autenticación',() => {
+  const auth={refresh:vi.fn(),admin:vi.fn(),token:vi.fn(),invalidate:vi.fn()};
+  beforeEach(() => {vi.resetAllMocks();auth.token.mockResolvedValue('local-test-token');TestBed.configureTestingModule({providers:[provideRouter([]),provideHttpClient(withInterceptors([authInterceptor])),provideHttpClientTesting(),{provide:AuthService,useValue:auth}]});});
+  afterEach(() => TestBed.inject(HttpTestingController).verify());
+  it('guard redirige a login sin sesión',async () => {auth.refresh.mockResolvedValue(false);const result=await TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot,{url:'/pedidos'} as RouterStateSnapshot));expect(TestBed.inject(Router).serializeUrl(result as import('@angular/router').UrlTree)).toContain('/login?returnUrl=');});
+  it('guard permite sesión y rechaza admin sin scope',async () => {auth.refresh.mockResolvedValue(true);expect(await TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot,{url:'/pedidos'} as RouterStateSnapshot))).toBe(true);auth.admin.mockReturnValue(false);const result=await TestBed.runInInjectionContext(() => adminGuard({} as ActivatedRouteSnapshot,{} as RouterStateSnapshot));expect(TestBed.inject(Router).serializeUrl(result as import('@angular/router').UrlTree)).toBe('/sin-permiso');});
+  it('guard permite admin con scope',async () => {auth.admin.mockReturnValue(true);expect(await TestBed.runInInjectionContext(() => adminGuard({} as ActivatedRouteSnapshot,{} as RouterStateSnapshot))).toBe(true);});
+  it('no confunde dominios ni prefijos parecidos',() => {expect(isApiUrl(environment.pedidosUrl+'/1')).toBe(true);expect(isApiUrl(environment.pedidosUrl+'-otro')).toBe(false);expect(isApiUrl('https://otro.example.test/api/pedidos')).toBe(false);});
+  it('añade Bearer únicamente a la API',async () => {const http=TestBed.inject(HttpClient);const control=TestBed.inject(HttpTestingController);const result=firstValueFrom(http.get(environment.pedidosUrl));await Promise.resolve();const req=control.expectOne(environment.pedidosUrl);expect(req.request.headers.get('Authorization')).toBe('Bearer local-test-token');req.flush([]);await result;const other=firstValueFrom(http.get('/asset.json'));const asset=control.expectOne('/asset.json');expect(asset.request.headers.has('Authorization')).toBe(false);asset.flush({});await other;expect(auth.token).toHaveBeenCalledTimes(1);});
+  it('invalida la sesión ante 401',async () => {const result=firstValueFrom(TestBed.inject(HttpClient).get(environment.pedidosUrl));const failure=expect(result).rejects.toMatchObject({status:401});await Promise.resolve();TestBed.inject(HttpTestingController).expectOne(environment.pedidosUrl).flush({}, {status:401,statusText:'Unauthorized'});await failure;expect(auth.invalidate).toHaveBeenCalled();});
+});

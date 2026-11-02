@@ -1,92 +1,44 @@
-# World Delivery - Frontend
+# World Delivery — Frontend
 
-Aplicación Single Page Application (SPA) construida en Angular, correspondiente a la capa frontend de la plataforma de logística World Delivery. Este proyecto se integra con Amazon Cognito para la gestión de identidad y consume un backend protegido en Spring Boot a través de Amazon API Gateway.
+Angular 22 standalone sin Zone.js. Proyecto renombrado a worlddelivery-front; interfaz actualizada mediante signals.
 
-## Arquitectura y Tecnologías
-
-- **Framework:** Angular
-- **Autenticación:** AWS Amplify + Amazon Cognito
-- **Flujo de Seguridad:** OAuth 2.0 / OIDC (Authorization Code Grant con PKCE)
-- **Integración Backend:** Amazon API Gateway + Interceptor HTTP para inyección automática de Bearer Token (JWT)
-
-## Prerrequisitos
-
-- Node.js y npm instalados.
-- Angular CLI instalado globalmente (`npm install -g @angular/cli`).
-- Entorno backend operativo (instancia EC2 con Spring Boot y API Gateway configurado).
-
-## Configuración de AWS Cognito
-
-Antes de ejecutar el proyecto, asegúrate de que las credenciales de tu User Pool y App Client público estén correctamente configuradas en el archivo `src/main.ts`:
-
-```typescript
-Amplify.configure({
-  Auth: {
-    Cognito: {
-      userPoolId: '<USER_POOL_ID>',
-      userPoolClientId: '<APP_CLIENT_ID>',
-      loginWith: {
-        oauth: {
-          domain: '<COGNITO_DOMAIN>',
-          scopes: ['email', 'openid', 'profile', 'resource-server-worlddelivery/api-access'],
-          redirectSignIn: ['http://localhost:4200'],
-          redirectSignOut: ['http://localhost:4200'],
-          responseType: 'code'
-        }
-      }
-    }
-  }
-});
-```
-
-> **Nota:** Las URLs de redirección (`localhost:4200`) deben estar explícitamente autorizadas en la consola de AWS Cognito (*Allowed callback URLs* / *Allowed sign-out URLs*).
-
-## Ejecución Local (Desarrollo)
-
-1. Instala las dependencias del proyecto:
-
-   ```bash
-   npm ci
-   ```
-
-2. Levanta el servidor de desarrollo:
-
-   ```bash
-   ng serve
-   ```
-
-   La aplicación estará disponible en `http://localhost:4200/`. El servidor recargará la vista automáticamente al detectar cambios en el código.
-
-## Construcción para Producción
-
-Para compilar los artefactos estáticos optimizados y subirlos a una instancia EC2 (Nginx) o un bucket S3:
-
-```bash
-ng build
-```
-
-Los archivos minificados listos para despliegue se generarán en el directorio `dist/`.
-
-## Etapa 1: base compilando y tests
-
-Rama: `ep3-rabbitmq`. El ZIP original no incluía historial Git.
+## Ejecutar
 
 ```powershell
 npm ci
+npm start
 npm run build
 npm test -- --watch=false
 ```
 
-Cuatro pruebas cubren pantalla sin sesión, sesión autenticada y consulta, fallback de correo a username, y error HTTP. Amplify y PedidosService se sustituyen por mocks: no se hacen llamadas a Cognito ni API Gateway.
+ng serve usa src/environments/environment.ts; ng build usa environment.production.ts. Desarrollo apunta a localhost:8080/api/pedidos y localhost:8082/api/rabbitmq. Sustituir REEMPLAZAR en producción por API Gateway (incluyendo stage) y CloudFront antes de publicar. Se conservaron los identificadores públicos de Cognito existentes.
 
-`package-lock.json` fija las versiones resueltas. Los nombres internos `pedidos360-front` se cambiarán en la etapa de frontend junto con sus referencias.
+Los environments son públicos al compilar. Nunca incluir client secret, contraseñas o access tokens. Angular no carga .env automáticamente. El app client del navegador debe ser público y sin secret.
 
-Si Windows restringe los archivos temporales, ejecutar antes de los tests:
+## Rutas y permisos
 
-```powershell
-New-Item -ItemType Directory -Force .angular/cache/test-temp | Out-Null
-$env:TEMP = (Resolve-Path .angular/cache/test-temp).Path
-$env:TMP = $env:TEMP
-```
+- Shell: sesión, logout, navegación y router-outlet.
+- /login: Authorization Code mediante Amplify y listener OAuth. Callbacks idénticos a environments, incluida barra final.
+- /pedidos: guard de sesión, listado, creación, cambio de estado y borrado confirmado.
+- /rabbit-admin: sesión y scope admin; crear y eliminar colas, exchanges y bindings, y consultar una cola por nombre. No simula un listado global.
+- /sin-permiso: mensaje de falta de permiso administrativo.
 
-No publicar secretos. `.env`, `.env.*`, logs, node_modules y compilados están excluidos de Git. `.env.example` solo puede contener marcadores. Los environments de Angular son públicos al compilar; no deben contener contraseñas.
+El interceptor adjunta el access token solo a las APIs configuradas, comparando origen y límites del path. Un 401 limpia el estado y lleva al login; un 403 muestra falta de permisos. Guards y botones no sustituyen la autorización de Spring y API Gateway.
+
+El login solicita también resource-server-worlddelivery/admin. Cognito todavía debe permitirlo: si falta, el proveedor puede rechazar el login. Habilitar un scope en un cliente compartido no distingue usuarios administradores; restringir su emisión o añadir control de grupo en la integración final.
+
+## Verificación
+
+Pruebas locales con mocks de Amplify y HTTP: shell, guards, límite del interceptor, 401, scopes, errores de login/logout, formulario, errores de escritura, cancelación de borrado y codificación de #. No llaman a AWS. Callbacks y permisos reales quedan para la prueba final.
+
+Salida: dist/worlddelivery-front/browser. CloudFront debe enviar errores 403/404 a /index.html con respuesta 200, solo en la distribución del frontend.
+
+Referencias: [guards Angular](https://angular.dev/api/router/CanActivateFn), [eventos Amplify](https://docs.amplify.aws/angular/build-a-backend/auth/connect-your-frontend/listen-to-auth-events/).
+
+## Defensa en cinco líneas
+
+1. Separé sesión, shell y vistas para mantener responsabilidades claras.
+2. Definí interfaces y servicios HTTP para respetar el contrato del backend.
+3. Usé guards y scopes para mostrar las operaciones según permisos.
+4. Mostré errores y confirmé borrados para que las acciones sean comprensibles.
+5. Probé los flujos localmente y dejé Cognito para la integración final.

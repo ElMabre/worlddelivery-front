@@ -1,0 +1,14 @@
+<div class="section-heading"><div><h2>Pedidos</h2><p>Consulta entregas y actualiza su recorrido.</p></div><button (click)="load()" [disabled]="busy()">Actualizar lista</button></div>
+@if(error()) { <p role="alert" class="error">{{error()}}</p> } @if(success()) { <p role="status" class="success">{{success()}}</p> }
+@if(auth.hasScope('write')) { <section class="card"><h3>Nuevo pedido</h3><form #form="ngForm" (ngSubmit)="create(form)"><fieldset [disabled]="busy()" class="form-grid">
+<label>Producto<input name="producto" [(ngModel)]="nuevo.producto" required maxlength="200"></label>
+<label>Cliente<input name="cliente" [(ngModel)]="nuevo.cliente" required maxlength="150"></label>
+<label>Dirección<input name="direccion" [(ngModel)]="nuevo.direccion" required maxlength="300"></label>
+<label>Fecha de entrega<input type="date" name="fechaEntrega" [(ngModel)]="nuevo.fechaEntrega" required></label>
+<label>Estado<select name="estado" [(ngModel)]="nuevo.estado">@for(estado of estados;track estado){<option [value]="estado">{{estado}}</option>}</select></label>
+<button class="primary" type="submit">Crear pedido</button></fieldset></form></section> }
+@if(busy()) {<p role="status">Procesando…</p>}
+<div class="cards">@for(pedido of pedidos();track pedido.id) {<article class="card"><p class="muted">Pedido #{{pedido.id}}</p><h3>{{pedido.producto}}</h3><p>{{pedido.cliente}}</p><p>{{pedido.direccion}}</p><p>Entrega: {{pedido.fechaEntrega}}</p><p class="badge">{{pedido.estado}}</p>
+@if(auth.hasScope('update')) {<label>Nuevo estado<select #estado [value]="pedido.estado" [disabled]="busy()">@for(value of estados;track value){<option [value]="value">{{value}}</option>}</select></label><button (click)="update(pedido,estado.value)" [disabled]="busy()">Guardar estado</button>}
+@if(auth.hasScope('delete')) {<button class="danger" (click)="remove(pedido)" [disabled]="busy()">Eliminar pedido</button>}
+</article>} @empty { @if(!busy() && !error()){<p>No hay pedidos registrados.</p>} }</div>

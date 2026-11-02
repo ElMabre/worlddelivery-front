@@ -3,11 +3,11 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": "59bfbaec-a7d5-46f6-88de-9e2ea8eb7629"
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
-    "pedidos360-front": {
+    "worlddelivery-front": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -43,7 +43,13 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.production.ts"
+                }
+              ]
             },
             "development": {
               "optimization": false,
@@ -57,10 +63,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "pedidos360-front:build:production"
+              "buildTarget": "worlddelivery-front:build:production"
             },
             "development": {
-              "buildTarget": "pedidos360-front:build:development"
+              "buildTarget": "worlddelivery-front:build:development"
             }
           },
           "defaultConfiguration": "development"
