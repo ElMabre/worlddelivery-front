@@ -3,7 +3,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 import { PedidosService } from './pedidos.service';
-import { CrearPedido, Pedido, EstadoPedido, ESTADOS } from './models';
+import { CrearPedido, Pedido, ESTADOS } from './models';
 import { apiError } from './api-error';
 @Component({selector:'app-pedidos',imports:[FormsModule],templateUrl:'./pedidos.html'})
 export class Pedidos implements OnInit {

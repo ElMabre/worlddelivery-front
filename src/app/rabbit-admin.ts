@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { RabbitAdminService } from './rabbit-admin.service';
 import { BindingRequest, ExchangeRequest, QueueStatus } from './models';
 import { apiError } from './api-error';

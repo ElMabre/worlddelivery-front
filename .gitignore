@@ -48,3 +48,6 @@ Thumbs.db
 .env.*
 !.env.example
 *.log
+*.pem
+cliente-*.json
+/src/environments/*.before-*
