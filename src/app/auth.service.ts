@@ -41,13 +41,17 @@ export class AuthService {
     try {
       const session=await fetchAuthSession(); const value=session.tokens?.accessToken?.toString();
       if(value) return value;
-    } catch { /* La UI recibe un 401 uniforme, sin exponer detalles del proveedor. */ }
+    } catch { /* La sesión se invalida abajo tanto si el token falta como si falla Amplify. */ }
     this.invalidate(); throw new HttpErrorResponse({status:401,statusText:'Sesión no disponible'});
   }
   async login(returnUrl='/pedidos') {
     this.error.set('');
     sessionStorage.setItem('wd.returnPath',returnUrl==='/rabbit-admin' ? returnUrl:'/pedidos');
-    try { await signInWithRedirect(); } catch { this.error.set('No se pudo iniciar sesión. Revisa la configuración de Cognito.'); }
+    try {
+      await signInWithRedirect({ options: { lang: 'es' } });
+    } catch {
+      this.error.set('No se pudo iniciar sesión. Revisa la configuración de Cognito.');
+    }
   }
   async logout() {
     this.error.set('');
