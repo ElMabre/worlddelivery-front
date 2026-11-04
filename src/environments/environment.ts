@@ -1,8 +1,7 @@
-// Identificadores publicos; nunca incluir client secrets ni tokens en Angular.
 export const environment = {
   production: false,
-  pedidosUrl: 'http://localhost:8080/api/pedidos',
-  rabbitAdminUrl: 'http://localhost:8082/api/rabbitmq',
+  pedidosUrl: 'https://owpdy1tbaj.execute-api.us-east-1.amazonaws.com/Deploy1_Ev/api/pedidos',
+  rabbitAdminUrl: 'https://owpdy1tbaj.execute-api.us-east-1.amazonaws.com/Deploy1_Ev/api/rabbitmq',
   cognito: {
     userPoolId: 'us-east-1_oTG1RQi5f',
     userPoolClientId: 'sdeamtb3pnutncs1kql17mtq',
