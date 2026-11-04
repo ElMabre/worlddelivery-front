@@ -1,5 +1,11 @@
-<div class="container">
-<header><div><p class="eyebrow">GESTIÓN DE ENTREGAS</p><h1>World Delivery</h1></div>
+<div class="container" [class.login-shell]="!auth.autenticado()">
+<header>
+  <h1 class="brand">
+    <picture>
+      <source media="(max-width: 600px)" srcset="/assets/logo_chico.svg">
+      <img src="/assets/Logo_Grande.svg" alt="World Delivery">
+    </picture>
+  </h1>
 @if(auth.autenticado()) { <div class="session"><span>{{auth.usuario()}}</span><button type="button" (click)="auth.logout()">Cerrar sesión</button></div> }
 </header>
 @if(auth.error()) { <p class="error" role="alert">{{auth.error()}}</p> }

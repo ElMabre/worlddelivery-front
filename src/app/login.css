@@ -1,0 +1,28 @@
+:host { display: flex; flex-direction: column; flex: 1; }
+.login-background {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: #F6F8FB;
+}
+.login-card {
+  background: white;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+  padding: 48px;
+  border-radius: 12px;
+  max-width: 450px;
+  width: 100%;
+  text-align: center;
+}
+.login-logo {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  margin: 0 auto 24px auto;
+  display: block;
+  object-fit: contain;
+}
+.login-card p { margin-top: 16px; color: var(--muted); }
+.login-card button { width: 100%; margin-top: 24px; }
