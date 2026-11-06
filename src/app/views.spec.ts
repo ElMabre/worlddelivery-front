@@ -16,13 +16,13 @@ describe('Vistas y contrato HTTP',() => {
   afterEach(() => vi.restoreAllMocks());
   it('muestra errores de escritura y conserva el pedido',async () => {
     const api={obtenerPedidos:vi.fn().mockReturnValue(of([pedido])),actualizarEstado:vi.fn().mockReturnValue(throwError(() => new HttpErrorResponse({status:403})))};
-    TestBed.configureTestingModule({imports:[Pedidos],providers:[{provide:AuthService,useValue:{hasScope:() => true}},{provide:PedidosService,useValue:api}]});
+    TestBed.configureTestingModule({imports:[Pedidos],providers:[{provide:AuthService,useValue:{hasScope:() => true,admin:() => true,rol:() => "Admin"}},{provide:PedidosService,useValue:api}]});
     const f=TestBed.createComponent(Pedidos);await f.whenStable();await f.componentInstance.update(pedido,'ENTREGADO');await f.whenStable();
     expect(f.nativeElement.querySelector('[role=alert]').textContent).toContain('No tienes permisos');expect(f.componentInstance.pedidos()[0].estado).toBe('PENDIENTE');expect(f.componentInstance.busy()).toBe(false);
   });
   it('crea pedidos desde un formulario válido y limpia los campos',async () => {
     const api={obtenerPedidos:vi.fn().mockReturnValue(of([])),crearPedido:vi.fn().mockReturnValue(of(pedido))};
-    TestBed.configureTestingModule({imports:[Pedidos],providers:[{provide:AuthService,useValue:{hasScope:() => true}},{provide:PedidosService,useValue:api}]});
+    TestBed.configureTestingModule({imports:[Pedidos],providers:[{provide:AuthService,useValue:{hasScope:() => true,admin:() => true,rol:() => "Admin"}},{provide:PedidosService,useValue:api}]});
     const f=TestBed.createComponent(Pedidos);await f.whenStable();
     for(const [name,value] of Object.entries({producto:'Caja',cliente:'Cliente',direccion:'Direccion',fechaEntrega:'2026-11-10'})) {
       const input=f.nativeElement.querySelector(`input[name="${name}"]`) as HTMLInputElement;
@@ -44,5 +44,28 @@ describe('Vistas y contrato HTTP',() => {
   it('codifica el comodín del binding y envía DELETE sin cuerpo',async () => {
     TestBed.configureTestingModule({providers:[provideHttpClient(),provideHttpClientTesting()]});const result=firstValueFrom(TestBed.inject(RabbitAdminService).deleteBinding({queue:'demo.q',exchange:'demo.x',routingKey:'pedido.#'}));
     const control=TestBed.inject(HttpTestingController);const req=control.expectOne(r => r.url===environment.rabbitAdminUrl+'/bindings');expect(req.request.method).toBe('DELETE');expect(req.request.urlWithParams).toContain('pedido.%23');expect(req.request.body).toBeNull();req.flush(null);await result;control.verify();
+  });
+  it('carga datos de prueba [ERROR-DLQ] en nuevo pedido',async () => {
+    const api={obtenerPedidos:vi.fn().mockReturnValue(of([]))};
+    TestBed.configureTestingModule({imports:[Pedidos],providers:[{provide:AuthService,useValue:{hasScope:() => true,admin:() => true,rol:() => 'Admin'}},{provide:PedidosService,useValue:api}]});
+    const f=TestBed.createComponent(Pedidos);await f.whenStable();
+    f.componentInstance.cargarDemoDlq();
+    expect(f.componentInstance.nuevo.producto).toContain('[ERROR-DLQ]');
+    expect(f.componentInstance.nuevo.direccion).toContain('[ERROR-DLQ]');
+  });
+  it('consulta las 6 colas de topología y permite purgar colas',async () => {
+    const api={
+      queueStatus:vi.fn().mockImplementation((name:string) => of({name,messagesReady:name.endsWith('.dlq') ? 2:0,consumers:name.endsWith('.dlq') ? 0:1})),
+      purgeQueue:vi.fn().mockImplementation((name:string) => of({name,messagesPurged:2}))
+    };
+    TestBed.configureTestingModule({imports:[RabbitAdmin],providers:[{provide:RabbitAdminService,useValue:api}]});
+    const f=TestBed.createComponent(RabbitAdmin);await f.whenStable();
+    await f.componentInstance.cargarTopologia();
+    expect(api.queueStatus).toHaveBeenCalledTimes(6);
+    expect(f.componentInstance.topologia().find(q => q.name==='q.despacho.tickets.dlq')?.messagesReady).toBe(2);
+    vi.spyOn(window,'confirm').mockReturnValue(true);
+    await f.componentInstance.purgarColaTopologia('q.despacho.tickets.dlq');
+    expect(api.purgeQueue).toHaveBeenCalledWith('q.despacho.tickets.dlq');
+    expect(f.componentInstance.success()).toContain('2 mensajes eliminados');
   });
 });
