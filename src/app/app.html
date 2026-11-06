@@ -10,6 +10,9 @@
 </header>
 @if(auth.error()) { <p class="error" role="alert">{{auth.error()}}</p> }
 @if(auth.autenticado()) { <nav aria-label="Navegación principal"><a routerLink="/pedidos" routerLinkActive="active">Pedidos</a>
-@if(auth.admin()) { <a routerLink="/rabbit-admin" routerLinkActive="active">Administración RabbitMQ</a> }</nav> }
+@if(auth.admin()) {
+<a routerLink="/usuarios" routerLinkActive="active">Usuarios</a>
+<a routerLink="/pedidos-inactivos" routerLinkActive="active">Pedidos inactivos</a>
+<a routerLink="/rabbit-admin" routerLinkActive="active">Administración RabbitMQ</a> }</nav> }
 <main><router-outlet /></main>
 </div>

@@ -8,6 +8,8 @@ export const routes:Routes=[
   {path:'login',component:Login},
   {path:'pedidos',canActivate:[authGuard],loadComponent:() => import('./pedidos').then(m => m.Pedidos)},
   {path:'rabbit-admin',canActivate:[authGuard,adminGuard],loadComponent:() => import('./rabbit-admin').then(m => m.RabbitAdmin)},
+  {path:'usuarios',canActivate:[authGuard,adminGuard],loadComponent:() => import('./usuarios').then(m => m.Usuarios)},
+  {path:'pedidos-inactivos',canActivate:[authGuard,adminGuard],loadComponent:() => import('./pedidos-inactivos').then(m => m.PedidosInactivos)},
   {path:'sin-permiso',component:SinPermiso,canActivate:[authGuard]},
   {path:'',redirectTo:'pedidos',pathMatch:'full'},
   {path:'**',redirectTo:'pedidos'},

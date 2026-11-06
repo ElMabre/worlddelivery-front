@@ -1,0 +1,31 @@
+<div class="page-layout">
+  <div class="section-heading"><h2>Usuarios</h2><button (click)="load()" [disabled]="busy()">Actualizar lista</button></div>
+  @if(error()){<p role="alert" class="error">{{error()}}</p>}
+  @if(success()){<p role="status" class="success">{{success()}}</p>}
+  @if(busy()){<p role="status">Procesando…</p>}
+  <div class="table-scroll" role="region" aria-label="Usuarios de Cognito" tabindex="0">
+    <table>
+      <caption>Usuarios del sistema</caption>
+      <thead><tr><th>Usuario</th><th>Correo y atributos</th><th>Estado</th><th>Rol y grupos</th><th>Acciones</th></tr></thead>
+      <tbody>
+        @for(user of usuarios();track user.username){
+          <tr>
+            <td>{{user.username}}</td>
+            <td>{{user.atributos['email'] || 'Sin correo'}}
+              <details><summary>Atributos</summary>
+                @for(attribute of atributos(user);track attribute[0]){<p>{{attribute[0]}}: {{attribute[1]}}</p>}
+              </details>
+            </td>
+            <td>{{user.enabled ? 'Habilitado' : 'Deshabilitado'}} · {{user.status}}</td>
+            <td>{{user.rol}}<p class="muted">{{user.grupos.join(', ')}}</p></td>
+            <td><div class="table-actions">
+              <label>Nuevo rol<select [(ngModel)]="roles[user.username]" [disabled]="busy()"><option>Usuario</option><option>Admin</option></select></label>
+              <button (click)="cambiarRol(user)" [disabled]="busy()">Guardar rol</button>
+              <button class="danger" (click)="deshabilitar(user)" [disabled]="busy() || !user.enabled">Deshabilitar</button>
+            </div></td>
+          </tr>
+        } @empty { @if(!busy()){<tr><td colspan="5">No hay usuarios disponibles.</td></tr>} }
+      </tbody>
+    </table>
+  </div>
+</div>

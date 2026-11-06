@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 export function isApiUrl(value:string):boolean {
   try {
     const url=new URL(value,window.location.origin);
-    return [environment.pedidosUrl,environment.rabbitAdminUrl].some(base => {
+    return [environment.pedidosUrl,environment.rabbitAdminUrl,environment.usuariosUrl].some(base => {
       const target=new URL(base,window.location.origin);
       return url.origin===target.origin && (url.pathname===target.pathname || url.pathname.startsWith(target.pathname+'/'));
     });

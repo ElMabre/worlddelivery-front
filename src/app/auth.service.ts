@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { fetchAuthSession, signInWithRedirect, signOut } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
-import { environment } from '../environments/environment';
 @Injectable({providedIn:'root'})
 export class AuthService {
   private router=inject(Router);
@@ -12,7 +11,9 @@ export class AuthService {
   readonly verificando=signal(true);
   readonly error=signal('');
   private scopes=signal<string[]>([]);
-  readonly admin=computed(() => this.scopes().includes(environment.adminScope));
+  private groups=signal<string[]>([]);
+  readonly admin=computed(() => this.groups().includes('Admin'));
+  readonly rol=computed(() => this.admin() ? 'Admin' : this.groups().includes('Usuario') ? 'Usuario' : 'Sin rol');
   private pending: Promise<boolean> | undefined;
   constructor() {
     const cancel=Hub.listen('auth', ({payload}) => {
@@ -31,6 +32,8 @@ export class AuthService {
     try {
       const session=await fetchAuthSession(); const token=session.tokens?.accessToken;
       this.autenticado.set(!!token);
+      const groups=token?.payload['cognito:groups'];
+      this.groups.set(Array.isArray(groups) ? groups.filter((g): g is string => typeof g==='string') : []);
       this.scopes.set(String(token?.payload['scope'] ?? '').split(' '));
       this.usuario.set(String(session.tokens?.idToken?.payload['email'] ?? token?.payload['username'] ?? 'Usuario'));
       return !!token;
@@ -46,7 +49,7 @@ export class AuthService {
   }
   async login(returnUrl='/pedidos') {
     this.error.set('');
-    sessionStorage.setItem('wd.returnPath',returnUrl==='/rabbit-admin' ? returnUrl:'/pedidos');
+    sessionStorage.setItem('wd.returnPath',this.allowedReturnPath(returnUrl));
     try {
       await signInWithRedirect({ options: { lang: 'es' } });
     } catch {
@@ -57,7 +60,10 @@ export class AuthService {
     this.error.set('');
     try { await signOut(); this.invalidate(); } catch { this.error.set('No se pudo cerrar sesión. Inténtalo otra vez.'); }
   }
-  returnPath() { const path=sessionStorage.getItem('wd.returnPath'); sessionStorage.removeItem('wd.returnPath'); return path==='/rabbit-admin' ? path:'/pedidos'; }
-  private clear() { this.autenticado.set(false); this.usuario.set(''); this.scopes.set([]); }
+  returnPath() { const path=sessionStorage.getItem('wd.returnPath'); sessionStorage.removeItem('wd.returnPath'); return this.allowedReturnPath(path); }
+  private allowedReturnPath(path:string|null) {
+    return path && ['/pedidos','/rabbit-admin','/usuarios','/pedidos-inactivos'].includes(path) ? path : '/pedidos';
+  }
+  private clear() { this.autenticado.set(false); this.usuario.set(''); this.scopes.set([]); this.groups.set([]); }
   invalidate() { this.clear(); void this.router.navigate(['/login']); }
 }

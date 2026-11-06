@@ -1,6 +1,7 @@
 export const environment = {
   production: false,
   pedidosUrl: 'https://owpdy1tbaj.execute-api.us-east-1.amazonaws.com/Deploy1_Ev/api/pedidos',
+  usuariosUrl: 'https://owpdy1tbaj.execute-api.us-east-1.amazonaws.com/Deploy1_Ev/api/usuarios',
   rabbitAdminUrl: 'https://owpdy1tbaj.execute-api.us-east-1.amazonaws.com/Deploy1_Ev/api/rabbitmq',
   cognito: {
     userPoolId: 'us-east-1_oTG1RQi5f',
