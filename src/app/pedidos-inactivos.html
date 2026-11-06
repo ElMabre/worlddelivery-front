@@ -1,0 +1,16 @@
+<div class="page-layout">
+  <div class="section-heading"><h2>Pedidos inactivos</h2><button (click)="load()" [disabled]="busy()">Actualizar lista</button></div>
+  @if(error()){<p role="alert" class="error">{{error()}}</p>}
+  @if(busy()){<p role="status">Cargando…</p>}
+  <div class="table-scroll" role="region" aria-label="Pedidos inactivos" tabindex="0">
+    <table>
+      <caption>Historial de pedidos desactivados</caption>
+      <thead><tr><th>ID</th><th>Producto</th><th>Cliente</th><th>Dirección</th><th>Entrega</th><th>Último estado</th></tr></thead>
+      <tbody>
+        @for(pedido of pedidos();track pedido.id){
+          <tr><td>{{pedido.id}}</td><td>{{pedido.producto}}</td><td>{{pedido.cliente}}</td><td>{{pedido.direccion}}</td><td>{{pedido.fechaEntrega}}</td><td>{{pedido.estado}}</td></tr>
+        } @empty { @if(!busy()){<tr><td colspan="6">No hay pedidos inactivos.</td></tr>} }
+      </tbody>
+    </table>
+  </div>
+</div>

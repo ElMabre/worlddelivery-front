@@ -1,16 +1,57 @@
 <div class="page-layout">
 <div class="section-heading"><div><h2>Pedidos</h2><p>Consulta entregas y actualiza su recorrido.</p></div><button (click)="load()" [disabled]="busy()">Actualizar lista</button></div>
 @if(error()) { <p role="alert" class="error">{{error()}}</p> } @if(success()) { <p role="status" class="success">{{success()}}</p> }
-@if(auth.hasScope('write')) { <section class="card"><h3>Nuevo pedido</h3><form #form="ngForm" (ngSubmit)="create(form)"><fieldset [disabled]="busy()" class="form-grid">
+@if(auth.hasScope('write')) { <section class="card"><div class="section-heading"><h3>Nuevo pedido</h3><button type="button" (click)="cargarDemoDlq()" [disabled]="busy()">Cargar prueba [ERROR-DLQ]</button></div><form #form="ngForm" (ngSubmit)="create(form)"><fieldset [disabled]="busy()" class="form-grid">
 <label>Producto<input name="producto" [(ngModel)]="nuevo.producto" required maxlength="200"></label>
 <label>Cliente<input name="cliente" [(ngModel)]="nuevo.cliente" required maxlength="150"></label>
 <label>Dirección<input name="direccion" [(ngModel)]="nuevo.direccion" required maxlength="300"></label>
 <label>Fecha de entrega<input type="date" name="fechaEntrega" [(ngModel)]="nuevo.fechaEntrega" required></label>
 <label>Estado<select name="estado" [(ngModel)]="nuevo.estado">@for(estado of estados;track estado){<option [value]="estado">{{estado}}</option>}</select></label>
 <button class="primary" type="submit">Crear pedido</button></fieldset></form></section> }
-@if(busy()) {<p role="status">Procesando…</p>}
-<div class="cards">@for(pedido of pedidos();track pedido.id) {<article class="card"><p class="muted">Pedido #{{pedido.id}}</p><h3>{{pedido.producto}}</h3><p>{{pedido.cliente}}</p><p>{{pedido.direccion}}</p><p>Entrega: {{pedido.fechaEntrega}}</p><p class="badge">{{pedido.estado}}</p>
-@if(auth.hasScope('update')) {<label>Nuevo estado<select #estado [value]="pedido.estado" [disabled]="busy()">@for(value of estados;track value){<option [value]="value">{{value}}</option>}</select></label><button (click)="update(pedido,estado.value)" [disabled]="busy()">Guardar estado</button>}
-@if(auth.hasScope('delete')) {<button class="danger" (click)="remove(pedido)" [disabled]="busy()">Eliminar pedido</button>}
-</article>} @empty { @if(!busy() && !error()){<p>No hay pedidos registrados.</p>} }</div>
+@if(busy() && !isLoading()) {<p role="status">Procesando…</p>}
+<label>Buscar por ID
+<input type="search" inputmode="numeric" aria-label="Buscar pedido por ID" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" placeholder="Ej. 25">
+</label>
+@if(editando; as pedido) {
+<section class="card" aria-labelledby="editar-titulo">
+  <h3 id="editar-titulo">Editar pedido #{{pedido.id}}</h3>
+  <form #editarForm="ngForm" (ngSubmit)="guardarEdicion(editarForm)">
+    <fieldset [disabled]="busy()" class="form-grid">
+      <label>Estado
+        <select name="editarEstado" [(ngModel)]="pedido.estado" (ngModelChange)="cambiarEstadoEdicion()">
+          @for(estado of estados;track estado){<option [value]="estado">{{estado}}</option>}
+        </select>
+      </label>
+      <label>Producto<input name="editarProducto" [(ngModel)]="pedido.producto" [disabled]="datosBloqueados()" required maxlength="200"></label>
+      <label>Cliente<input name="editarCliente" [(ngModel)]="pedido.cliente" [disabled]="datosBloqueados()" required maxlength="150"></label>
+      <label>Dirección<input name="editarDireccion" [(ngModel)]="pedido.direccion" [disabled]="datosBloqueados()" required maxlength="300"></label>
+      <label>Fecha de entrega<input type="date" name="editarFecha" [(ngModel)]="pedido.fechaEntrega" [disabled]="datosBloqueados()" required></label>
+    </fieldset>
+    @if(datosBloqueados()){<p role="status">Cambia el estado de ENTREGADO a otro estado para editar los datos. Ambos cambios se guardarán juntos.</p>}
+    <div class="actions">
+      <button class="primary" type="submit" [disabled]="busy()">Guardar cambios</button>
+      <button type="button" (click)="cancelarEdicion()" [disabled]="busy()">Cancelar</button>
+    </div>
+  </form>
+</section>
+}
+@if(isLoading()) {
+<section aria-busy="true" aria-label="Cargando pedidos">
+  <p role="status">Cargando pedidos…</p>
+  <div class="cards" aria-hidden="true">
+    @for(row of skeletonRows;track row) {
+      <article class="card skeleton-card">
+        <div class="skeleton skeleton-short"></div><div class="skeleton skeleton-title"></div>
+        <div class="skeleton"></div><div class="skeleton"></div>
+        <div class="skeleton skeleton-short"></div><div class="skeleton skeleton-button"></div>
+      </article>
+    }
+  </div>
+</section>
+} @else {
+<div class="cards">@for(pedido of filtrados();track pedido.id) {<article class="card"><p class="muted">Pedido #{{pedido.id}}</p><h3>{{pedido.producto}}</h3><p>{{pedido.cliente}}</p><p>{{pedido.direccion}}</p><p>Entrega: {{pedido.fechaEntrega}}</p><p class="badge">{{pedido.estado}}</p>
+@if((auth.admin() || auth.rol()==='Usuario') && auth.hasScope('update')) {<button type="button" (click)="comenzarEdicion(pedido)" [disabled]="busy()">Editar pedido</button><label>Nuevo estado<select #estado [value]="pedido.estado" [disabled]="busy()">@for(value of estados;track value){<option [value]="value">{{value}}</option>}</select></label><button (click)="update(pedido,estado.value)" [disabled]="busy()">Guardar estado</button>}
+@if(auth.admin() && auth.hasScope('delete')) {<button class="danger" (click)="remove(pedido)" [disabled]="busy()">Eliminar pedido</button>}
+</article>} @empty { @if(!busy() && !error()){<p>No hay pedidos que coincidan con la búsqueda.</p>} }</div>
+}
 </div>
